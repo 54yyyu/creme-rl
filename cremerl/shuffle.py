@@ -23,12 +23,12 @@ def dinuc_shuffle(seq, num_shufs=None, rng=None, seed=None):
     result is an N x L x D NumPy array of shuffled versions of `seq`, also
     one-hot encoded. If `num_shufs` is not specified, then the first dimension
     of N will not be present (i.e. a single string will be returned, or an L x D
-    array).
+    array). The orientation of the returned array matches that of the input.
     """
     if type(seq) is str:
         arr = string_to_char_array(seq)
     elif type(seq) is np.ndarray and len(seq.shape) == 2:
-        one_hot_dim, seq_len = seq.shape
+        seq_len, one_hot_dim = seq.shape
         arr = one_hot_to_tokens(seq)
     else:
         raise ValueError("Expected string or one-hot encoded array")
@@ -79,7 +79,7 @@ def dinuc_shuffle(seq, num_shufs=None, rng=None, seed=None):
             all_results.append(char_array_to_string(chars[result]))
         else:
             all_results[i] = tokens_to_one_hot(chars[result], one_hot_dim)
-    return np.transpose(all_results) if num_shufs else np.transpose(all_results[0])
+    return all_results if num_shufs else all_results[0]
 
 
 ##############################################################################
@@ -108,10 +108,10 @@ def one_hot_to_tokens(one_hot):
     Converts an L x D one-hot encoding into an L-vector of integers in the range
     [0, D], where the token D is used when the one-hot encoding is all 0. This
     assumes that the one-hot encoding is well-formed, with at most one 1 in each
-    column (and 0s elsewhere).
+    row (and 0s elsewhere).
     """
-    tokens = np.tile(one_hot.shape[0], one_hot.shape[1])  # Vector of all D
-    dim_inds, seq_inds = np.where(one_hot)
+    tokens = np.tile(one_hot.shape[1], one_hot.shape[0])  # Vector of all D
+    seq_inds, dim_inds = np.where(one_hot)
     tokens[seq_inds] = dim_inds
     return tokens
 

@@ -83,28 +83,29 @@ def get_batch(x, tile_range, tile_ranges_ori, trials):
     return np.array(test_batch)
 
 def get_batch_score(pred, trials):
-    """
-    Calculate scores for a batch of predictions.
+    """Aggregate prediction scores across trials.
 
-    Parameters:
-    - pred (numpy.ndarray): Batch of prediction results.
-    - trials (int): Number of trials for generating the batch.
+    Parameters
+    ----------
+    pred : numpy.ndarray
+        Array of model predictions arranged in pairs ``(original, mutated)``.
+        The first dimension should therefore be an even number.
+    trials : int
+        Number of trials used when generating ``pred``.
 
-    Returns:
-    - final (numpy.ndarray): Array of calculated scores.
+    Returns
+    -------
+    float
+        The averaged score computed by summing the difference of every
+        prediction pair and dividing by ``trials``.
     """
-    score = []
-    score_sep = []
+    pred = np.asarray(pred)
+
+    total = 0.0
     for i in range(0, pred.shape[0], 2):
-        score1 = pred[0] - pred[i]
-        score2 = pred[i+1] - pred[1]
-        score.append(np.sum(score1 + score2).tolist())
-        score_sep.append((score1+score2).tolist())
-        
-    final = np.sum(np.array(score), axis=0) / trials
-    total_score_sep = np.sum(np.array(score_sep), axis=0) / trials
+        total += np.sum(pred[i] - pred[i + 1])
 
-    return final
+    return total / trials
 
 
 def extend_sequence(one_hot_sequence):

@@ -98,7 +98,7 @@ def get_batch_score(pred, trials):
     for i in range(0, pred.shape[0], 2):
         score1 = pred[0] - pred[i]
         score2 = pred[i+1] - pred[1]
-        score.append((np.sum((score1, score2)[0])).tolist())
+        score.append(np.sum(score1 + score2).tolist())
         score_sep.append((score1+score2).tolist())
         
     final = np.sum(np.array(score), axis=0) / trials
